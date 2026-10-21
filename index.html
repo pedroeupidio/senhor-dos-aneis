@@ -5,7 +5,12 @@
 <div id="msg" class="error"></div>
 <section id="joinScreen" class="panel hide"><h2>Entrar na sala</h2><label>Seu nome<input id="nick" maxlength="24" placeholder="Seu nome"></label><label>Posição na mesa<select id="position"></select></label><button id="joinBtn">Entrar na sala</button></section>
 <section id="lobbyScreen" class="panel hide"><h2>Sala de espera</h2><p>O primeiro jogador conectado escolhe o mestre. O mestre não recebe cartas na mão.</p><div id="players"></div><p id="masterInfo"></p><div class="row"><button id="startBtn" class="hide">Começar partida</button><button id="leaveBtn" class="secondary">Sair</button></div></section>
-<section id="setupScreen" class="panel hide"><h2>Preparação do mestre</h2><p>Coloque as três cartas iniciais nas regiões que desejar. Elas serão as primeiras pistas para o grupo.</p><div id="setupCards" class="hand"></div><p id="setupChoice" class="muted"></p><div class="row" id="setupRegions"></div><button id="finishSetup" disabled>Iniciar rodadas</button></section>
+<section id="setupScreen" class="panel hide"><h2>Preparação do mestre</h2><p>Coloque as três cartas iniciais nas regiões que desejar. Elas serão as primeiras pistas para o grupo.</p><div id="setupRules" class="rules"></div>
+<p class="muted"><b>Azul</b> = característica física · <b>Laranja</b> = contexto ou significado · <b>Verde</b> = característica da palavra. A carta deve ir à interseção dos anéis cujas regras ela atende; se não atender nenhuma, fica fora.</p>
+<div class="diagram"><div class="ring a"></div><div class="ring b"></div><div class="ring c"></div>
+<button class="spot" data-r="a">0</button><button class="spot" data-r="b">0</button><button class="spot" data-r="c">0</button><button class="spot" data-r="ab">0</button><button class="spot" data-r="ac">0</button><button class="spot" data-r="bc">0</button><button class="spot" data-r="abc">0</button><button class="spot" data-r="out">0 <small>fora</small></button></div>
+<p class="muted">Escolha uma carta abaixo e toque diretamente na região do diagrama para posicioná-la.</p>
+<div id="setupCards" class="hand"></div><p id="setupChoice" class="muted"></p><button id="finishSetup" disabled>Iniciar rodadas</button></section>
 <section id="gameScreen" class="hide">
 <div class="panel"><div class="top"><h2>Diagrama</h2><span id="turnInfo" class="tag"></span></div><div id="banner" class="banner"></div><div class="diagram"><div class="ring a"></div><div class="ring b"></div><div class="ring c"></div>
 <button class="spot" data-r="a">0</button><button class="spot" data-r="b">0</button><button class="spot" data-r="c">0</button><button class="spot" data-r="ab">0</button><button class="spot" data-r="ac">0</button><button class="spot" data-r="bc">0</button><button class="spot" data-r="abc">0</button><button class="spot" data-r="out">0 <small>fora</small></button></div>
@@ -64,15 +69,19 @@ function render(){
  show("startBtn",host&&!!s.master&&list.length>=2);
  }
  if(phase==="setup"){
- $("setupCards").replaceChildren();$("setupRegions").replaceChildren();
+ $("setupCards").replaceChildren();
+ $("setupRules").replaceChildren();
+ if(master(s)){["Azul · Física","Laranja · Contexto","Verde · Palavra"].forEach((title,i)=>{const p=document.createElement("p");p.textContent=`${title}: ${s.rules?.[i]||"—"}`;$("setupRules").append(p)})}
+ else $("setupRules").textContent="As regras são secretas e aparecem apenas para o mestre.";
  if(master(s)){const remaining=s.starters||[];if(!remaining.includes(setupChoice))setupChoice=null;
  for(const name of remaining){const b=tile(name,false,setupChoice===name);b.onclick=()=>{setupChoice=name;render()};$("setupCards").append(b)}
  $("setupChoice").textContent=setupChoice?`Escolha onde colocar: ${setupChoice}`:"Selecione uma das três cartas iniciais.";
- for(const z of zones){const b=document.createElement("button");b.className="small secondary";b.textContent=labels[z];b.disabled=!setupChoice;b.onclick=()=>placeStarter(z);$("setupRegions").append(b)}
+
  $("finishSetup").disabled=remaining.length>0;
  }else{$("setupChoice").textContent="O mestre está posicionando as três cartas iniciais. Aguarde.";show("finishSetup",false)}
  show("finishSetup",master(s));
  }
+ if(phase==="setup"){for(const spot of document.querySelectorAll("#setupScreen .spot")){const r=spot.dataset.r,n=(s.board?.[r]||[]).length;spot.replaceChildren(document.createTextNode(String(n)));if(r==="out"){const sm=document.createElement("small");sm.textContent="fora";spot.append(sm)}}}
  if(phase==="game"){
  const isMaster=master(s),pending=s.pending,whose=players[s.turn]?.name||"Jogador desconectado";
  $("turnInfo").textContent=`Vez de ${whose}`;
@@ -114,11 +123,11 @@ $("startBtn").onclick=()=>tx(s=>{if(s?.phase!=="lobby"||ordered(s)[0]?.[0]!==uid
  for(const [id] of ordered(s)){if(id!==s.master)hands[id]=deck.splice(0,5)}
  s.phase="setup";s.starters=starters;s.board=board;s.hands=hands;s.deck=deck;s.rules=[physical[Math.floor(Math.random()*20)],contextual[Math.floor(Math.random()*20)],linguistic[Math.floor(Math.random()*20)]];s.turn=nextTurn(s,s.master);s.pending=null;s.winner=null;s.revealed=false;return s
 });
-async function placeStarter(region){const name=setupChoice;await tx(s=>{if(s?.phase!=="setup"||s.master!==uid||!s.starters?.includes(name))return;s.board[region].push(name);s.starters=s.starters.filter(x=>x!==name);return s});setupChoice=null}
+async function placeStarter(region){const name=setupChoice;await tx(s=>{if(s?.phase!=="setup"||s.master!==uid||!s.starters?.includes(name))return;s.board=s.board||{};s.board[region]=Array.isArray(s.board[region])?s.board[region]:[];s.board[region].push(name);s.starters=s.starters.filter(x=>x!==name);return s});setupChoice=null}
 $("finishSetup").onclick=()=>tx(s=>{if(s?.phase!=="setup"||s.master!==uid||s.starters?.length)return;s.phase="game";delete s.starters;return s});
 $("playBtn").onclick=()=>{const card=cardChoice,region=regionChoice;tx(s=>{if(s?.phase!=="game"||s.turn!==uid||s.pending||!s.hands?.[uid]?.includes(card)||!zones.includes(region))return;s.pending={player:uid,card,region};return s})};
-async function judge(correct){await tx(s=>{if(s?.phase!=="game"||s.master!==uid||!s.pending||!zones.includes(correct))return;const {player,card,region}=s.pending;if(!s.hands?.[player]?.includes(card))return;s.board[correct]=s.board[correct]||[];s.board[correct].push(card);s.hands[player]=s.hands[player].filter(x=>x!==card);if(correct!==region){if(s.deck?.length)s.hands[player].push(s.deck.shift());s.turn=nextTurn(s,player)}else if(!s.hands[player].length){s.phase="end";s.winner=player}if(!s.hands[player].length&&s.phase==="game"){s.phase="end";s.winner=player}s.pending=null;return s});cardChoice=null;regionChoice=null}
-for(const spot of document.querySelectorAll(".spot"))spot.onclick=()=>{const r=spot.dataset.r;if(state.phase!=="game")return;if(!master(state)&&state.turn===uid&&!state.pending&&cardChoice){regionChoice=r;render()}else{const cards=[...(state.board?.[r]||[])].reverse();$("modalTitle").textContent=`${labels[r]} · ${cards.length} carta(s)`;$("modalCards").replaceChildren();for(const name of cards){const b=tile(name,true);b.disabled=true;$("modalCards").append(b)}if(!cards.length){const p=document.createElement("p");p.textContent="Nenhuma carta nesta região.";$("modalCards").append(p)}show("modal",true)}};
+async function judge(correct){await tx(s=>{if(s?.phase!=="game"||s.master!==uid||!s.pending||!zones.includes(correct))return;const {player,card,region}=s.pending;if(!s.hands?.[player]?.includes(card))return;s.board=s.board||{};s.board[correct]=s.board[correct]||[];s.board[correct].push(card);s.hands[player]=s.hands[player].filter(x=>x!==card);if(correct!==region){if(s.deck?.length)s.hands[player].push(s.deck.shift());s.turn=nextTurn(s,player)}else if(!s.hands[player].length){s.phase="end";s.winner=player}if(!s.hands[player].length&&s.phase==="game"){s.phase="end";s.winner=player}s.pending=null;return s});cardChoice=null;regionChoice=null}
+for(const spot of document.querySelectorAll(".spot"))spot.onclick=()=>{const r=spot.dataset.r;if(state.phase==="setup"&&master(state)&&setupChoice){placeStarter(r);return}if(state.phase!=="game")return;if(!master(state)&&state.turn===uid&&!state.pending&&cardChoice){regionChoice=r;render()}else{const cards=[...(state.board?.[r]||[])].reverse();$("modalTitle").textContent=`${labels[r]} · ${cards.length} carta(s)`;$("modalCards").replaceChildren();for(const name of cards){const b=tile(name,true);b.disabled=true;$("modalCards").append(b)}if(!cards.length){const p=document.createElement("p");p.textContent="Nenhuma carta nesta região.";$("modalCards").append(p)}show("modal",true)}};
 $("closeModal").onclick=()=>show("modal",false);$("modal").onclick=e=>{if(e.target===$("modal"))show("modal",false)};
 $("revealBtn").onclick=()=>tx(s=>{if(s?.phase!=="end"||s.master!==uid)return;s.revealed=true;return s});
 $("againBtn").onclick=()=>tx(s=>{if(s?.phase!=="end"||s.master!==uid)return;return{phase:"lobby",players:s.players||{},master:""}});
