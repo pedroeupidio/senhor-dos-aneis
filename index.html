@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Senhor dos Anéis — Sala</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#253047;background:#faf5ea}*{box-sizing:border-box}body{margin:0;padding:22px}main{max-width:570px;margin:35px auto}.card{background:white;border-radius:24px;padding:25px;box-shadow:0 8px 30px #1f293714;margin:15px 0}h1{font-size:2.3rem;line-height:1.1}h2{font-size:1.2rem}p{color:#687184}input,select,button{width:100%;padding:14px;border-radius:12px;font:inherit;margin:7px 0}input,select{border:1px solid #d7dce2;background:white}button{border:0;background:#4387e8;color:white;font-weight:750;cursor:pointer}button.secondary{background:#f0f3f7;color:#253047}button:disabled{opacity:.45;cursor:default}.person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #eee}.person button{width:auto;padding:9px 12px;margin:0;background:#f59d4a;color:#222}.pill{display:inline-block;border-radius:99px;background:#d9f3e4;padding:5px 9px;font-size:12px}.hidden{display:none}.circles{display:flex;gap:0;margin:18px 0}.circles i{display:block;width:54px;height:54px;border-radius:50%;opacity:.75;margin-right:-12px;border:3px solid white}.error{color:#ad3636}#status{font-size:13px}
+</style></head><body><main>
+<div class="circles"><i style="background:#72a9ef"></i><i style="background:#f8ac6c"></i><i style="background:#79ce99"></i></div>
+<h1>Senhor dos Anéis</h1><p>Um jogo de associações, dedução e interpretações.</p>
+<div id="status">Conectando...</div>
+<section id="entry" class="card hidden"><h2>Entrar na partida</h2><label>Seu nome<input id="name" maxlength="24" placeholder="Como quer aparecer?"></label><label>Sua posição<select id="position"></select></label><button id="join">Entrar na sala</button></section>
+<section id="lobby" class="card hidden"><h2>Sala de espera</h2><p>O grupo escolhe o mestre. A seleção deve ser feita por quem entrou primeiro na sala.</p><div id="people"></div><p id="role"></p><button id="leave" class="secondary">Sair da sala</button><p style="font-size:12px">Versão 1: entrada, posições e escolha do mestre. O sorteio e a partida serão adicionados na próxima etapa.</p></section>
+<p id="message" class="error"></p>
+</main>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+import {getAuth,signInAnonymously,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+import {getDatabase,ref,onValue,runTransaction,remove,onDisconnect} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+const config={apiKey:"AIzaSyBoyJXTEwMR6z5GZVOz0LhNTFyTlzr_Pyg",authDomain:"senhor-dos-aneis-4b0ac.firebaseapp.com",databaseURL:"https://senhor-dos-aneis-4b0ac-default-rtdb.firebaseio.com",projectId:"senhor-dos-aneis-4b0ac",storageBucket:"senhor-dos-aneis-4b0ac.firebasestorage.app",messagingSenderId:"87231063332",appId:"1:87231063332:web:96ac98ce2a79f4fbb87fb1"};
+const app=initializeApp(config),auth=getAuth(app),db=getDatabase(app);
+const $=id=>document.getElementById(id),root=ref(db,"sala"),status=$("status");
+let uid=null,sala={},busy=false;
+for(let i=1;i<=20;i++){const opt=document.createElement("option");opt.value=i;opt.textContent="Posição "+i;$("position").append(opt)}
+function say(msg){$("message").textContent=msg}
+function render(){
+ const players=sala.players||{},me=players[uid],list=Object.entries(players).sort((a,b)=>a[1].position-b[1].position);
+ $("entry").classList.toggle("hidden",!!me);$("lobby").classList.toggle("hidden",!me);
+ if(!me)return;
+ const host=list[0]?.[0]==uid;
+ $("role").textContent=sala.master===uid?"Você é o mestre":sala.master?"Mestre escolhido: "+(players[sala.master]?.name||"Desconectado"):"Mestre ainda não escolhido";
+ $("people").replaceChildren();
+ for(const [id,p] of list){
+  const div=document.createElement("div");div.className="person";
+  const label=document.createElement("span");label.textContent=p.position+" · "+p.name+(id===uid?" (você)":"")+(id===sala.master?" 👑":"");
+  div.append(label);
+  if(host){const btn=document.createElement("button");btn.textContent=id===sala.master?"Mestre ✓":"Escolher mestre";btn.disabled=id===sala.master;btn.onclick=()=>chooseMaster(id);div.append(btn)}
+  $("people").append(div);
+ }
+}
+async function chooseMaster(id){
+ try{const r=await runTransaction(root,s=>{if(!s?.players?.[uid]||!s.players[id])return;const first=Object.entries(s.players).sort((a,b)=>a[1].position-b[1].position)[0]?.[0];if(first!==uid)return;s.master=id;return s});if(!r.committed)say("Não foi possível escolher o mestre.")}catch(e){say(e.message)}
+}
+$("join").onclick=async()=>{
+ if(busy||!uid)return;const name=$("name").value.trim(),position=Number($("position").value);
+ if(name.length<2){say("Digite um nome com pelo menos 2 caracteres.");return}
+ busy=true;$("join").disabled=true;say("");
+ try{
+  const r=await runTransaction(root,s=>{
+   s=s||{players:{},master:""};s.players=s.players||{};
+   if(Object.entries(s.players).some(([id,p])=>id!==uid&&p.position===position))return;
+   s.players[uid]={name,position};return s;
+  });
+  if(!r.committed){say("Essa posição já está ocupada. Escolha outra.");return}
+  await onDisconnect(ref(db,"sala/players/"+uid)).remove();
+ }catch(e){say("Erro ao entrar: "+e.message)}
+ finally{busy=false;$("join").disabled=false}
+};
+$("leave").onclick=async()=>{try{await remove(ref(db,"sala/players/"+uid))}catch(e){say(e.message)}};
+onAuthStateChanged(auth,u=>{
+ if(!u)return;uid=u.uid;status.textContent="Conectado ao Firebase";
+ onValue(root,snap=>{sala=snap.val()||{};render()},e=>{status.textContent="Sem acesso ao banco";say("Confira as regras do Realtime Database: "+e.message)});
+});
+signInAnonymously(auth).catch(e=>{status.textContent="Falha na autenticação";say(e.message)});
+</script></body></html>
