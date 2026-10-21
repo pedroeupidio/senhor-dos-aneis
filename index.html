@@ -1,63 +1,127 @@
-<!doctype html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Senhor dos Anéis — Sala</title>
+<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Senhor dos Anéis</title>
 <style>
-:root{font-family:system-ui,sans-serif;color:#253047;background:#faf5ea}*{box-sizing:border-box}body{margin:0;padding:22px}main{max-width:570px;margin:35px auto}.card{background:white;border-radius:24px;padding:25px;box-shadow:0 8px 30px #1f293714;margin:15px 0}h1{font-size:2.3rem;line-height:1.1}h2{font-size:1.2rem}p{color:#687184}input,select,button{width:100%;padding:14px;border-radius:12px;font:inherit;margin:7px 0}input,select{border:1px solid #d7dce2;background:white}button{border:0;background:#4387e8;color:white;font-weight:750;cursor:pointer}button.secondary{background:#f0f3f7;color:#253047}button:disabled{opacity:.45;cursor:default}.person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #eee}.person button{width:auto;padding:9px 12px;margin:0;background:#f59d4a;color:#222}.pill{display:inline-block;border-radius:99px;background:#d9f3e4;padding:5px 9px;font-size:12px}.hidden{display:none}.circles{display:flex;gap:0;margin:18px 0}.circles i{display:block;width:54px;height:54px;border-radius:50%;opacity:.75;margin-right:-12px;border:3px solid white}.error{color:#ad3636}#status{font-size:13px}
-</style></head><body><main>
-<div class="circles"><i style="background:#72a9ef"></i><i style="background:#f8ac6c"></i><i style="background:#79ce99"></i></div>
-<h1>Senhor dos Anéis</h1><p>Um jogo de associações, dedução e interpretações.</p>
-<div id="status">Conectando...</div>
-<section id="entry" class="card hidden"><h2>Entrar na partida</h2><label>Seu nome<input id="name" maxlength="24" placeholder="Como quer aparecer?"></label><label>Sua posição<select id="position"></select></label><button id="join">Entrar na sala</button></section>
-<section id="lobby" class="card hidden"><h2>Sala de espera</h2><p>O grupo escolhe o mestre. A seleção deve ser feita por quem entrou primeiro na sala.</p><div id="people"></div><p id="role"></p><button id="leave" class="secondary">Sair da sala</button><p style="font-size:12px">Versão 1: entrada, posições e escolha do mestre. O sorteio e a partida serão adicionados na próxima etapa.</p></section>
-<p id="message" class="error"></p>
-</main>
+:root{--ink:#273348;--muted:#707b89;--paper:#faf6ed;--blue:#6da7df;--orange:#eda46e;--green:#80c5a2}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,sans-serif}main{max-width:760px;margin:auto;padding:18px 14px 100px}h1{font-size:30px;letter-spacing:-1px;margin:8px 0}h2{font-size:19px;margin:4px 0 12px}p{color:var(--muted);line-height:1.5}.panel{background:#fff;border:1px solid #e9e8e2;border-radius:20px;padding:18px;margin:13px 0;box-shadow:0 6px 18px #1823350b}input,select,button{font:inherit;border-radius:12px;padding:12px;border:1px solid #d9dfdf}input,select{width:100%;background:#fff;margin:7px 0 12px}button{background:#3b78b9;color:white;border:0;font-weight:700;cursor:pointer}button:disabled{opacity:.45;cursor:default}.secondary{background:#edf1f4;color:var(--ink)}.danger{background:#b34f52}.small{font-size:13px;padding:8px 11px}.row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.row>*{flex:1}.hide{display:none!important}.muted{font-size:13px;color:var(--muted)}.error{color:#a84242}.player{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0f0ee;padding:9px 0;gap:8px}.player button{width:auto}.tag{display:inline-block;background:#f1f3f2;border-radius:30px;padding:5px 9px;font-size:12px}.top{display:flex;justify-content:space-between;align-items:center;gap:8px}.diagram{position:relative;max-width:480px;aspect-ratio:1.25;margin:10px auto 15px;touch-action:manipulation}.ring{position:absolute;width:64%;height:72%;border:12px solid;opacity:.74;border-radius:50%;pointer-events:none}.ring.a{left:3%;top:0;border-color:var(--blue)}.ring.b{right:3%;top:0;border-color:var(--orange)}.ring.c{left:18%;top:26%;border-color:var(--green)}.spot{position:absolute;z-index:2;border:2px solid #fff;background:#fffef7ee;min-width:45px;height:43px;padding:4px;border-radius:13px;box-shadow:0 2px 10px #0002;color:#273348;font-weight:800;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:3px}.spot.selected{outline:3px solid #314b68;background:#e8f2fc}.spot small{font-weight:500;font-size:10px}.spot[data-r="a"]{left:19%;top:25%}.spot[data-r="b"]{left:81%;top:25%}.spot[data-r="c"]{left:50%;top:84%}.spot[data-r="ab"]{left:50%;top:15%}.spot[data-r="ac"]{left:32%;top:58%}.spot[data-r="bc"]{left:68%;top:58%}.spot[data-r="abc"]{left:50%;top:43%}.spot[data-r="out"]{left:88%;top:90%}.hand{display:flex;gap:10px;overflow-x:auto;padding:7px 2px 16px;scroll-snap-type:x proximity}.tile{flex:0 0 124px;min-height:125px;border:3px solid transparent;border-radius:16px;padding:12px 7px;color:#253044;display:flex;flex-direction:column;align-items:center;justify-content:space-around;gap:8px;text-align:center;scroll-snap-align:start;box-shadow:0 2px 7px #0001;cursor:pointer}.tile.selected{border-color:#253044;transform:translateY(-3px)}.tile strong{font-size:14px;line-height:1.2}.tile .art{font-size:37px}.tile.blue{background:#b6d5f1}.tile.orange{background:#f6d2b4}.tile.green{background:#bee5cf}.tile.mini{min-height:90px;flex-basis:110px}.tile.mini .art{font-size:27px}.count{font-weight:800;font-size:19px}.overlay{position:fixed;inset:0;background:#17283a99;display:flex;align-items:center;justify-content:center;z-index:10;padding:18px}.modal{background:#fff;border-radius:22px;max-width:520px;width:100%;max-height:85vh;overflow:auto;padding:22px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:9px}.grid .tile{width:100%;min-height:96px}.rules{padding:10px 15px;background:#f5f7f5;border-radius:12px}.rules p{margin:7px 0;color:var(--ink)}.banner{padding:13px;border-radius:14px;background:#e8f0f8;font-weight:650}.banner.pending{background:#fff1df}#msg{min-height:20px}footer{text-align:center;font-size:11px;color:#9aa1a8;padding:15px}</style></head><body><main>
+<header class="top"><div><div class="tag">PARTY GAME • MULTIPLAYER</div><h1>Senhor dos Anéis</h1></div><span id="connection" class="tag">Conectando…</span></header>
+<div id="msg" class="error"></div>
+<section id="joinScreen" class="panel hide"><h2>Entrar na sala</h2><label>Seu nome<input id="nick" maxlength="24" placeholder="Seu nome"></label><label>Posição na mesa<select id="position"></select></label><button id="joinBtn">Entrar na sala</button></section>
+<section id="lobbyScreen" class="panel hide"><h2>Sala de espera</h2><p>O primeiro jogador conectado escolhe o mestre. O mestre não recebe cartas na mão.</p><div id="players"></div><p id="masterInfo"></p><div class="row"><button id="startBtn" class="hide">Começar partida</button><button id="leaveBtn" class="secondary">Sair</button></div></section>
+<section id="setupScreen" class="panel hide"><h2>Preparação do mestre</h2><p>Coloque as três cartas iniciais nas regiões que desejar. Elas serão as primeiras pistas para o grupo.</p><div id="setupCards" class="hand"></div><p id="setupChoice" class="muted"></p><div class="row" id="setupRegions"></div><button id="finishSetup" disabled>Iniciar rodadas</button></section>
+<section id="gameScreen" class="hide">
+<div class="panel"><div class="top"><h2>Diagrama</h2><span id="turnInfo" class="tag"></span></div><div id="banner" class="banner"></div><div class="diagram"><div class="ring a"></div><div class="ring b"></div><div class="ring c"></div>
+<button class="spot" data-r="a">0</button><button class="spot" data-r="b">0</button><button class="spot" data-r="c">0</button><button class="spot" data-r="ab">0</button><button class="spot" data-r="ac">0</button><button class="spot" data-r="bc">0</button><button class="spot" data-r="abc">0</button><button class="spot" data-r="out">0 <small>fora</small></button></div>
+<p class="muted">Toque em uma região para consultar suas cartas. Na sua vez, selecione uma carta e uma região antes de confirmar.</p></div>
+<div id="masterPanel" class="panel hide"><h2>Painel do mestre</h2><div id="masterRules" class="rules"></div><div id="masterAction"></div></div>
+<div id="handPanel" class="panel hide"><h2>Suas cartas <span id="handCount"></span></h2><div id="hand" class="hand"></div><p id="choice" class="muted"></p><button id="playBtn" disabled>Confirmar jogada</button></div>
+<div id="pendingPanel" class="panel hide"><h2>Jogada em avaliação</h2><div id="pendingText"></div></div>
+</section>
+<section id="endScreen" class="panel hide"><h2 id="winnerTitle"></h2><p>Conversem e tentem adivinhar as três regras antes de revelá-las.</p><div id="revealedRules" class="rules hide"></div><div class="row"><button id="revealBtn" class="hide">Revelar regras</button><button id="againBtn" class="hide secondary">Jogar novamente</button></div></section>
+<footer>Uma sala compartilhada • Cada jogador usa seu próprio celular</footer></main>
+<div id="modal" class="overlay hide"><div class="modal"><div class="top"><h2 id="modalTitle"></h2><button class="secondary small" id="closeModal" style="flex:0">Fechar</button></div><div id="modalCards" class="grid"></div></div></div>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
 import {getAuth,signInAnonymously,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import {getDatabase,ref,onValue,runTransaction,remove,onDisconnect} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
-const config={apiKey:"AIzaSyBoyJXTEwMR6z5GZVOz0LhNTFyTlzr_Pyg",authDomain:"senhor-dos-aneis-4b0ac.firebaseapp.com",databaseURL:"https://senhor-dos-aneis-4b0ac-default-rtdb.firebaseio.com",projectId:"senhor-dos-aneis-4b0ac",storageBucket:"senhor-dos-aneis-4b0ac.firebasestorage.app",messagingSenderId:"87231063332",appId:"1:87231063332:web:96ac98ce2a79f4fbb87fb1"};
-const app=initializeApp(config),auth=getAuth(app),db=getDatabase(app);
-const $=id=>document.getElementById(id),root=ref(db,"sala"),status=$("status");
-let uid=null,sala={},busy=false;
-for(let i=1;i<=20;i++){const opt=document.createElement("option");opt.value=i;opt.textContent="Posição "+i;$("position").append(opt)}
-function say(msg){$("message").textContent=msg}
+import {getDatabase,ref,onValue,runTransaction,onDisconnect,remove} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+const firebaseConfig={apiKey:"AIzaSyBoyJXTEwMR6z5GZVOz0LhNTFyTlzr_Pyg",authDomain:"senhor-dos-aneis-4b0ac.firebaseapp.com",databaseURL:"https://senhor-dos-aneis-4b0ac-default-rtdb.firebaseio.com",projectId:"senhor-dos-aneis-4b0ac",storageBucket:"senhor-dos-aneis-4b0ac.firebasestorage.app",messagingSenderId:"87231063332",appId:"1:87231063332:web:96ac98ce2a79f4fbb87fb1"};
+const physical=["Possui uma cor primária","Possui uma cor secundária","É predominantemente claro","É predominantemente escuro","Possui formato arredondado","Possui pontas","É maior que uma pessoa","Cabe na palma da mão","É flexível","É resistente","É delicado","É bonito","É visualmente chamativo","É confortável ao toque","É pesado","É macio","É transparente","Possui superfície áspera","É fácil de quebrar","Possui aparência incomum"];
+const contextual=["É essencial para a sobrevivência","É utilizado no dia a dia","Pode ser encontrado em uma cozinha","Está associado à infância","É utilizado no trabalho","Pode representar perigo","Está associado à riqueza","Pode ser encontrado na natureza","É utilizado para diversão","Está relacionado à saúde","É utilizado para transporte","Está associado a comemorações","É utilizado para comunicação","Está associado ao medo","Pode ser encontrado em uma escola","Representa liberdade","Pode proporcionar conforto","Está associado ao amor","Pode ser considerado uma arma","Está associado à sorte ou ao azar"];
+const linguistic=["Possui até 3 sílabas","Possui 4 sílabas ou mais","Começa com uma vogal","Termina com uma vogal","Possui a letra R","Possui a letra S","Possui letras repetidas","Possui exatamente 5 letras","Possui mais de 7 letras","É uma palavra masculina","É uma palavra feminina","Possui acento gráfico","Possui a letra O","Possui a letra M","Possui número ímpar de letras","Possui a letra A","Possui a letra E","Começa com uma consoante","Termina com uma consoante","Possui a mesma vogal mais de uma vez"];
+const raw=[
+"Morango,Berinjela,Abacaxi,Banana,Maçã,Melancia,Pipoca,Chocolate,Queijo,Café",
+"Cachorro,Gato,Elefante,Borboleta,Tubarão,Coruja,Polvo,Girafa,Cobra,Tartaruga",
+"Árvore,Flor,Pedra,Concha,Nuvem,Sol,Lua,Vulcão,Cacto,Fogo",
+"Cadeira,Espelho,Travesseiro,Panela,Garfo,Tesoura,Lâmpada,Relógio,Chave,Sofá",
+"Celular,Computador,Televisão,Rádio,Câmera,Microfone,Teclado,Robô,Drone,Satélite",
+"Chapéu,Boné,Sapato,Óculos,Luvas,Vestido,Gravata,Mochila,Bolsa,Colar",
+"Carro,Bicicleta,Motocicleta,Avião,Navio,Trem,Ônibus,Caminhão,Skate,Foguete",
+"Martelo,Alicate,Tijolo,Escada,Capacete,Pá,Machado,Corda,Cadeado,Ímã",
+"Bola,Violão,Piano,Tambor,Livro,Pincel,Dado,Baralho,Boneca,Troféu",
+"Coroa,Espada,Escudo,Coração,Diamante,Moeda,Presente,Vela,Balão,Máscara",
+"Camisinha,Lingerie,Algema,Chicote,Espartilho,Salto alto,Sutiã,Cueca,Óleo corporal,Venda",
+"Cigarro,Garrafa de whisky,Taça de vinho,Lata de cerveja,Narguilé,Isqueiro,Cinzeiro,Comprimido,Seringa,Energético",
+"Boleto,Dentadura,Absorvente,Desodorante,Papel higiênico,Teste de gravidez,Fralda geriátrica,Carteira de trabalho,Cofre,Desentupidor",
+"Calcinha,Cama de casal,Banheira,Câmera escondida,Pepino,Língua,Boca,Pênis de borracha,Meia-calça,Espelho de bolso",
+"Aliança,Batom,Perfume,Peruca,Tatuagem,Cílios postiços,Buquê de flores,Fralda,Prótese dentária,Cinta modeladora"
+];
+const names=raw.flatMap(s=>s.split(",")),emoji={Morango:"🍓",Berinjela:"🍆",Abacaxi:"🍍",Banana:"🍌",Maçã:"🍎",Melancia:"🍉",Pipoca:"🍿",Chocolate:"🍫",Queijo:"🧀",Café:"☕",Cachorro:"🐕",Gato:"🐈",Elefante:"🐘",Borboleta:"🦋",Tubarão:"🦈",Coruja:"🦉",Polvo:"🐙",Girafa:"🦒",Cobra:"🐍",Tartaruga:"🐢",Árvore:"🌳",Flor:"🌼",Pedra:"🪨",Concha:"🐚",Nuvem:"☁️",Sol:"☀️",Lua:"🌙",Vulcão:"🌋",Cacto:"🌵",Fogo:"🔥",Cadeira:"🪑",Espelho:"🪞",Travesseiro:"🛏️",Panela:"🍲",Garfo:"🍴",Tesoura:"✂️",Lâmpada:"💡",Relógio:"⏰",Chave:"🔑",Sofá:"🛋️",Celular:"📱",Computador:"💻",Televisão:"📺",Rádio:"📻",Câmera:"📷",Microfone:"🎤",Teclado:"⌨️",Robô:"🤖",Drone:"🚁",Satélite:"🛰️",Chapéu:"🎩",Boné:"🧢",Sapato:"👞",Óculos:"👓",Luvas:"🧤",Vestido:"👗",Gravata:"👔",Mochila:"🎒",Bolsa:"👜",Colar:"📿",Carro:"🚗",Bicicleta:"🚲",Motocicleta:"🏍️",Avião:"✈️",Navio:"🚢",Trem:"🚆",Ônibus:"🚌",Caminhão:"🚚",Skate:"🛹",Foguete:"🚀",Martelo:"🔨",Alicate:"🛠️",Tijolo:"🧱",Escada:"🪜",Capacete:"⛑️",Pá:"🛠️",Machado:"🪓",Corda:"🪢",Cadeado:"🔒",Ímã:"🧲",Bola:"⚽",Violão:"🎸",Piano:"🎹",Tambor:"🥁",Livro:"📚",Pincel:"🖌️",Dado:"🎲",Baralho:"🃏",Boneca:"🪆",Troféu:"🏆",Coroa:"👑",Espada:"⚔️",Escudo:"🛡️",Coração:"❤️",Diamante:"💎",Moeda:"🪙",Presente:"🎁",Vela:"🕯️",Balão:"🎈",Máscara:"🎭"};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getDatabase(app),room=ref(db,"sala"),$=id=>document.getElementById(id);
+let uid="",state={},cardChoice=null,regionChoice=null,setupChoice=null,locked=false;
+const zones=["a","b","c","ab","ac","bc","abc","out"],labels={a:"Somente azul",b:"Somente laranja",c:"Somente verde",ab:"Azul + laranja",ac:"Azul + verde",bc:"Laranja + verde",abc:"Três anéis",out:"Fora dos anéis"};
+const shuffled=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const show=(id,yes)=>$(id).classList.toggle("hide",!yes),message=t=>$("msg").textContent=t;
+const ordered=s=>Object.entries(s?.players||{}).sort((a,b)=>a[1].position-b[1].position),nextTurn=(s,id)=>{const ids=ordered(s).map(x=>x[0]).filter(x=>x!==s.master);if(!ids.length)return null;return ids[(ids.indexOf(id)+1)%ids.length]};
+const master=s=>s.master===uid;
+const colors=["blue","orange","green"];
+function tile(name,mini=false,selected=false){const el=document.createElement("button");el.type="button";el.className=`tile ${colors[names.indexOf(name)%3]} ${mini?"mini":""} ${selected?"selected":""}`;const art=document.createElement("span");art.className="art";art.textContent=emoji[name]||"✦";const txt=document.createElement("strong");txt.textContent=name;el.append(art,txt);return el}
 function render(){
- const players=sala.players||{},me=players[uid],list=Object.entries(players).sort((a,b)=>a[1].position-b[1].position);
- $("entry").classList.toggle("hidden",!!me);$("lobby").classList.toggle("hidden",!me);
+ const s=state,players=s.players||{},me=players[uid],phase=s.phase||"lobby";
+ show("joinScreen",!me);show("lobbyScreen",!!me&&phase==="lobby");show("setupScreen",!!me&&phase==="setup");show("gameScreen",!!me&&phase==="game");show("endScreen",!!me&&phase==="end");
+ const pos=$("position");const selected=pos.value;pos.replaceChildren();for(let i=1;i<=20;i++){const option=document.createElement("option");option.value=i;const occupant=Object.entries(players).find(([id,p])=>id!==uid&&p.position===i);option.disabled=!!occupant;option.textContent=`Posição ${i}${occupant?" — ocupada":""}`;pos.append(option)}pos.value=pos.querySelector(`option[value="${selected}"]:not(:disabled)`)?.value||[...pos.options].find(x=>!x.disabled)?.value||"";
  if(!me)return;
- const host=list[0]?.[0]==uid;
- $("role").textContent=sala.master===uid?"Você é o mestre":sala.master?"Mestre escolhido: "+(players[sala.master]?.name||"Desconectado"):"Mestre ainda não escolhido";
- $("people").replaceChildren();
- for(const [id,p] of list){
-  const div=document.createElement("div");div.className="person";
-  const label=document.createElement("span");label.textContent=p.position+" · "+p.name+(id===uid?" (você)":"")+(id===sala.master?" 👑":"");
-  div.append(label);
-  if(host){const btn=document.createElement("button");btn.textContent=id===sala.master?"Mestre ✓":"Escolher mestre";btn.disabled=id===sala.master;btn.onclick=()=>chooseMaster(id);div.append(btn)}
-  $("people").append(div);
+ if(phase==="lobby"){
+ const list=ordered(s),host=list[0]?.[0]===uid;$("players").replaceChildren();
+ for(const [id,p] of list){const line=document.createElement("div");line.className="player";const label=document.createElement("span");label.textContent=`${p.position} · ${p.name}${id===uid?" (você)":""}${id===s.master?" 👑":""}`;line.append(label);if(host){const b=document.createElement("button");b.className="small";b.textContent=id===s.master?"Mestre ✓":"Escolher mestre";b.disabled=id===s.master;b.onclick=()=>tx(t=>{if(ordered(t)[0]?.[0]!==uid||!t.players?.[id]||t.phase!=="lobby")return;t.master=id;return t});line.append(b)}$("players").append(line)}
+ $("masterInfo").textContent=s.master?`Mestre: ${players[s.master]?.name||"não conectado"}`:"Escolham o mestre para começar.";
+ show("startBtn",host&&!!s.master&&list.length>=2);
+ }
+ if(phase==="setup"){
+ $("setupCards").replaceChildren();$("setupRegions").replaceChildren();
+ if(master(s)){const remaining=s.starters||[];if(!remaining.includes(setupChoice))setupChoice=null;
+ for(const name of remaining){const b=tile(name,false,setupChoice===name);b.onclick=()=>{setupChoice=name;render()};$("setupCards").append(b)}
+ $("setupChoice").textContent=setupChoice?`Escolha onde colocar: ${setupChoice}`:"Selecione uma das três cartas iniciais.";
+ for(const z of zones){const b=document.createElement("button");b.className="small secondary";b.textContent=labels[z];b.disabled=!setupChoice;b.onclick=()=>placeStarter(z);$("setupRegions").append(b)}
+ $("finishSetup").disabled=remaining.length>0;
+ }else{$("setupChoice").textContent="O mestre está posicionando as três cartas iniciais. Aguarde.";show("finishSetup",false)}
+ show("finishSetup",master(s));
+ }
+ if(phase==="game"){
+ const isMaster=master(s),pending=s.pending,whose=players[s.turn]?.name||"Jogador desconectado";
+ $("turnInfo").textContent=`Vez de ${whose}`;
+ $("banner").textContent=pending?`${players[pending.player]?.name||"Jogador"} colocou "${pending.card}" em ${labels[pending.region]}. Aguardando o mestre.`:isMaster?"Você é o mestre. Avalie as jogadas dos participantes.":s.turn===uid?"Sua vez! Escolha uma carta e uma região.":`Aguarde a vez de ${whose}.`;
+ $("banner").classList.toggle("pending",!!pending);
+ for(const spot of document.querySelectorAll(".spot")){const r=spot.dataset.r,n=(s.board?.[r]||[]).length;spot.innerHTML="";spot.append(document.createTextNode(String(n)));if(r==="out"){const small=document.createElement("small");small.textContent="fora";spot.append(small)}spot.classList.toggle("selected",r===regionChoice)}
+ show("masterPanel",isMaster);show("handPanel",!isMaster);show("pendingPanel",!!pending);
+ if(isMaster){
+ $("masterRules").replaceChildren();["Azul","Laranja","Verde"].forEach((x,i)=>{const p=document.createElement("p");p.textContent=`${x}: ${s.rules?.[i]||"—"}`;$("masterRules").append(p)});
+ $("masterAction").replaceChildren();
+ if(pending){const p=document.createElement("p");p.textContent=`${pending.card} → ${labels[pending.region]}`;$("masterAction").append(p);
+ const ok=document.createElement("button");ok.textContent="Confirmar posição correta";ok.onclick=()=>judge(pending.region);$("masterAction").append(ok);
+ const text=document.createElement("p");text.textContent="Ou escolha a região correta:";$("masterAction").append(text);
+ const sel=document.createElement("select");for(const z of zones){const opt=document.createElement("option");opt.value=z;opt.textContent=labels[z];sel.append(opt)}sel.value=pending.region;$("masterAction").append(sel);
+ const fix=document.createElement("button");fix.className="secondary";fix.textContent="Mover para a região selecionada";fix.onclick=()=>judge(sel.value);$("masterAction").append(fix)}
+ }else{
+ const hand=s.hands?.[uid]||[];if(!hand.includes(cardChoice))cardChoice=null;
+ $("handCount").textContent=`(${hand.length}/5)`;$("hand").replaceChildren();
+ for(const name of hand){const b=tile(name,false,cardChoice===name);b.disabled=s.turn!==uid||!!pending;b.onclick=()=>{cardChoice=name;render()};$("hand").append(b)}
+ const canPlay=s.turn===uid&&!pending&&!!cardChoice&&!!regionChoice;$("playBtn").disabled=!canPlay;
+ $("choice").textContent=cardChoice?`Carta: ${cardChoice} · Região: ${regionChoice?labels[regionChoice]:"selecione no diagrama"}`:"Selecione uma carta da sua mão.";
+ }
+ if(pending)$("pendingText").textContent=`${players[pending.player]?.name||"Jogador"}: ${pending.card} → ${labels[pending.region]}`;
+ }
+ if(phase==="end"){
+ $("winnerTitle").textContent=`🏆 ${players[s.winner]?.name||"Um jogador"} venceu!`;
+ show("revealBtn",master(s)&&!s.revealed);show("againBtn",master(s));
+ show("revealedRules",!!s.revealed);
+ if(s.revealed)$("revealedRules").textContent=`Azul: ${s.rules?.[0]}\nLaranja: ${s.rules?.[1]}\nVerde: ${s.rules?.[2]}`;
+ $("revealedRules").style.whiteSpace="pre-line";
  }
 }
-async function chooseMaster(id){
- try{const r=await runTransaction(root,s=>{if(!s?.players?.[uid]||!s.players[id])return;const first=Object.entries(s.players).sort((a,b)=>a[1].position-b[1].position)[0]?.[0];if(first!==uid)return;s.master=id;return s});if(!r.committed)say("Não foi possível escolher o mestre.")}catch(e){say(e.message)}
-}
-$("join").onclick=async()=>{
- if(busy||!uid)return;const name=$("name").value.trim(),position=Number($("position").value);
- if(name.length<2){say("Digite um nome com pelo menos 2 caracteres.");return}
- busy=true;$("join").disabled=true;say("");
- try{
-  const r=await runTransaction(root,s=>{
-   s=s||{players:{},master:""};s.players=s.players||{};
-   if(Object.entries(s.players).some(([id,p])=>id!==uid&&p.position===position))return;
-   s.players[uid]={name,position};return s;
-  });
-  if(!r.committed){say("Essa posição já está ocupada. Escolha outra.");return}
-  await onDisconnect(ref(db,"sala/players/"+uid)).remove();
- }catch(e){say("Erro ao entrar: "+e.message)}
- finally{busy=false;$("join").disabled=false}
-};
-$("leave").onclick=async()=>{try{await remove(ref(db,"sala/players/"+uid))}catch(e){say(e.message)}};
-onAuthStateChanged(auth,u=>{
- if(!u)return;uid=u.uid;status.textContent="Conectado ao Firebase";
- onValue(root,snap=>{sala=snap.val()||{};render()},e=>{status.textContent="Sem acesso ao banco";say("Confira as regras do Realtime Database: "+e.message)});
+async function tx(fn){if(locked)return;locked=true;try{const res=await runTransaction(room,s=>fn(s),{applyLocally:false});if(!res.committed)message("Ação não permitida ou estado mudou. Tente novamente.");else message("")}catch(e){message("Erro: "+e.message)}finally{locked=false}}
+$("joinBtn").onclick=async()=>{const name=$("nick").value.trim(),position=Number($("position").value);if(name.length<2){message("Digite um nome com pelo menos 2 caracteres.");return}await tx(s=>{s=s||{phase:"lobby",players:{}};if(s.phase!=="lobby")return;s.players=s.players||{};if(Object.entries(s.players).some(([id,p])=>id!==uid&&p.position===position))return;s.players[uid]={name,position};return s});if(state.players?.[uid])await onDisconnect(ref(db,`sala/players/${uid}`)).remove().catch(()=>{})};
+$("leaveBtn").onclick=()=>tx(s=>{if(!s?.players?.[uid]||s.phase!=="lobby")return;delete s.players[uid];if(s.master===uid)s.master="";return s});
+$("startBtn").onclick=()=>tx(s=>{if(s?.phase!=="lobby"||ordered(s)[0]?.[0]!==uid||!s.master||ordered(s).length<2)return;
+ const deck=shuffled(names),board=Object.fromEntries(zones.map(z=>[z,[]])),hands={};
+ const starters=deck.splice(0,3);
+ for(const [id] of ordered(s)){if(id!==s.master)hands[id]=deck.splice(0,5)}
+ s.phase="setup";s.starters=starters;s.board=board;s.hands=hands;s.deck=deck;s.rules=[physical[Math.floor(Math.random()*20)],contextual[Math.floor(Math.random()*20)],linguistic[Math.floor(Math.random()*20)]];s.turn=nextTurn(s,s.master);s.pending=null;s.winner=null;s.revealed=false;return s
 });
-signInAnonymously(auth).catch(e=>{status.textContent="Falha na autenticação";say(e.message)});
+async function placeStarter(region){const name=setupChoice;await tx(s=>{if(s?.phase!=="setup"||s.master!==uid||!s.starters?.includes(name))return;s.board[region].push(name);s.starters=s.starters.filter(x=>x!==name);return s});setupChoice=null}
+$("finishSetup").onclick=()=>tx(s=>{if(s?.phase!=="setup"||s.master!==uid||s.starters?.length)return;s.phase="game";delete s.starters;return s});
+$("playBtn").onclick=()=>{const card=cardChoice,region=regionChoice;tx(s=>{if(s?.phase!=="game"||s.turn!==uid||s.pending||!s.hands?.[uid]?.includes(card)||!zones.includes(region))return;s.pending={player:uid,card,region};return s})};
+async function judge(correct){await tx(s=>{if(s?.phase!=="game"||s.master!==uid||!s.pending||!zones.includes(correct))return;const {player,card,region}=s.pending;if(!s.hands?.[player]?.includes(card))return;s.board[correct]=s.board[correct]||[];s.board[correct].push(card);s.hands[player]=s.hands[player].filter(x=>x!==card);if(correct!==region){if(s.deck?.length)s.hands[player].push(s.deck.shift());s.turn=nextTurn(s,player)}else if(!s.hands[player].length){s.phase="end";s.winner=player}if(!s.hands[player].length&&s.phase==="game"){s.phase="end";s.winner=player}s.pending=null;return s});cardChoice=null;regionChoice=null}
+for(const spot of document.querySelectorAll(".spot"))spot.onclick=()=>{const r=spot.dataset.r;if(state.phase!=="game")return;if(!master(state)&&state.turn===uid&&!state.pending&&cardChoice){regionChoice=r;render()}else{const cards=[...(state.board?.[r]||[])].reverse();$("modalTitle").textContent=`${labels[r]} · ${cards.length} carta(s)`;$("modalCards").replaceChildren();for(const name of cards){const b=tile(name,true);b.disabled=true;$("modalCards").append(b)}if(!cards.length){const p=document.createElement("p");p.textContent="Nenhuma carta nesta região.";$("modalCards").append(p)}show("modal",true)}};
+$("closeModal").onclick=()=>show("modal",false);$("modal").onclick=e=>{if(e.target===$("modal"))show("modal",false)};
+$("revealBtn").onclick=()=>tx(s=>{if(s?.phase!=="end"||s.master!==uid)return;s.revealed=true;return s});
+$("againBtn").onclick=()=>tx(s=>{if(s?.phase!=="end"||s.master!==uid)return;return{phase:"lobby",players:s.players||{},master:""}});
+onAuthStateChanged(auth,u=>{if(!u)return;uid=u.uid;$("connection").textContent="● Online";onValue(room,snap=>{state=snap.val()||{};render()},e=>{message("Não foi possível ler a sala: "+e.message);$("connection").textContent="Offline"})});
+signInAnonymously(auth).catch(e=>message("Falha no login anônimo: "+e.message));
 </script></body></html>
