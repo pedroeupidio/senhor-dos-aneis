@@ -106,7 +106,7 @@ function render(){
  }
 }
 async function tx(fn){if(locked)return;locked=true;try{const res=await runTransaction(room,s=>fn(s),{applyLocally:false});if(!res.committed)message("Ação não permitida ou estado mudou. Tente novamente.");else message("")}catch(e){message("Erro: "+e.message)}finally{locked=false}}
-$("joinBtn").onclick=async()=>{const name=$("nick").value.trim(),position=Number($("position").value);if(name.length<2){message("Digite um nome com pelo menos 2 caracteres.");return}await tx(s=>{s=s||{phase:"lobby",players:{}};if(s.phase!=="lobby")return;s.players=s.players||{};if(Object.entries(s.players).some(([id,p])=>id!==uid&&p.position===position))return;s.players[uid]={name,position};return s});if(state.players?.[uid])await onDisconnect(ref(db,`sala/players/${uid}`)).remove().catch(()=>{})};
+$("joinBtn").onclick=async()=>{const name=$("nick").value.trim(),position=Number($("position").value);if(name.length<2){message("Digite um nome com pelo menos 2 caracteres.");return}await tx(s=>{s=s||{phase:"lobby",players:{}};if(!s.phase)s.phase="lobby";if(s.phase!=="lobby")return;s.players=s.players||{};if(Object.entries(s.players).some(([id,p])=>id!==uid&&p.position===position))return;s.players[uid]={name,position};return s});if(state.players?.[uid])await onDisconnect(ref(db,`sala/players/${uid}`)).remove().catch(()=>{})};
 $("leaveBtn").onclick=()=>tx(s=>{if(!s?.players?.[uid]||s.phase!=="lobby")return;delete s.players[uid];if(s.master===uid)s.master="";return s});
 $("startBtn").onclick=()=>tx(s=>{if(s?.phase!=="lobby"||ordered(s)[0]?.[0]!==uid||!s.master||ordered(s).length<2)return;
  const deck=shuffled(names),board=Object.fromEntries(zones.map(z=>[z,[]])),hands={};
